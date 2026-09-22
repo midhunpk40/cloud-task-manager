@@ -24,10 +24,13 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install flask
+        run: pip install flask pytest
 
       - name: Check Python syntax
         run: python -m py_compile app.py database.py
+
+      - name: Run application tests
+        run: pytest -q
 
   build-and-push:
     needs: test

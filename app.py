@@ -1,4 +1,3 @@
-```python
 from flask import Flask, render_template, request, redirect
 import sqlite3
 
@@ -53,4 +52,4 @@ def home():
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=5000)
-```
+

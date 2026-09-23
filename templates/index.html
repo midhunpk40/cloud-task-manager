@@ -1,32 +1,835 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Cloud Task Manager</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Roboto, sans-serif;
+            background: #0b0f19;
+            color: #f5f7fb;
+            min-height: 100vh;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 250px;
+            background: #101521;
+            border-right: 1px solid #202838;
+            padding: 28px 18px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 10px;
+            margin-bottom: 42px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #6d5dfc, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .brand-name {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            color: #7e899e;
+            margin-top: 2px;
+        }
+
+        .nav-title {
+            color: #626d82;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 0 12px;
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 9px;
+            margin-bottom: 5px;
+            color: #929caf;
+            font-size: 14px;
+        }
+
+        .nav-item.active {
+            background: #1b2030;
+            color: #ffffff;
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-bottom {
+            position: absolute;
+            bottom: 25px;
+            left: 18px;
+            right: 18px;
+        }
+
+        .cloud-status {
+            background: #151b29;
+            border: 1px solid #252e40;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #a7b0c1;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #32d583;
+            box-shadow: 0 0 8px rgba(50, 213, 131, 0.6);
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 32px 42px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 34px;
+        }
+
+        .page-title {
+            font-size: 27px;
+            font-weight: 700;
+            letter-spacing: -0.7px;
+        }
+
+        .page-description {
+            color: #7e899e;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #242b3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* STATS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #111725;
+            border: 1px solid #202838;
+            border-radius: 15px;
+            padding: 21px;
+        }
+
+        .stat-label {
+            color: #7e899e;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stat-description {
+            color: #667187;
+            font-size: 11px;
+            margin-top: 6px;
+        }
+
+        /* CONTENT GRID */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
+            gap: 22px;
+        }
+
+        .panel {
+            background: #111725;
+            border: 1px solid #202838;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 650;
+        }
+
+        .panel-subtitle {
+            color: #6f7a90;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* TASK FORM */
+
+        .task-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .task-input {
+            flex: 1;
+            background: #0b101b;
+            border: 1px solid #293247;
+            color: #ffffff;
+            padding: 13px 15px;
+            border-radius: 10px;
+            outline: none;
+            font-size: 13px;
+            transition: border 0.2s;
+        }
+
+        .task-input:focus {
+            border-color: #7567ff;
+        }
+
+        .task-input::placeholder {
+            color: #59657a;
+        }
+
+        .add-btn {
+            border: none;
+            background: linear-gradient(135deg, #6d5dfc, #845ef7);
+            color: white;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.92;
+        }
+
+        /* TASKS */
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 15px;
+            background: #0d131f;
+            border: 1px solid #1d2636;
+            border-radius: 11px;
+            transition: border 0.2s, transform 0.2s;
+        }
+
+        .task:hover {
+            border-color: #303b52;
+            transform: translateY(-1px);
+        }
+
+        .task-check {
+            width: 19px;
+            height: 19px;
+            border: 1px solid #46516a;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-name {
+            font-size: 13px;
+            color: #e8ebf2;
+            word-break: break-word;
+        }
+
+        .task-id {
+            font-size: 10px;
+            color: #59657a;
+            margin-top: 4px;
+        }
+
+        .badge {
+            background: rgba(50, 213, 131, 0.1);
+            color: #55d998;
+            border: 1px solid rgba(50, 213, 131, 0.18);
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* EMPTY STATE */
+
+        .empty {
+            text-align: center;
+            padding: 42px 20px;
+            border: 1px dashed #293247;
+            border-radius: 12px;
+        }
+
+        .empty-icon {
+            font-size: 30px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .empty-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .empty-text {
+            color: #667187;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        /* SIDE INFO */
+
+        .info-card {
+            padding: 15px;
+            background: #0d131f;
+            border: 1px solid #1d2636;
+            border-radius: 11px;
+            margin-bottom: 11px;
+        }
+
+        .info-label {
+            font-size: 10px;
+            color: #69758b;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 7px;
+        }
+
+        .info-value {
+            font-size: 13px;
+            color: #e2e6ee;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 12px;
+        }
+
+        .tech {
+            padding: 6px 9px;
+            border-radius: 7px;
+            background: #171e2c;
+            border: 1px solid #252f42;
+            color: #9ba5b8;
+            font-size: 10px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 70px;
+                padding: 25px 10px;
+            }
+
+            .brand-name,
+            .brand-subtitle,
+            .nav-title,
+            .nav-item span:not(.nav-icon),
+            .cloud-status {
+                display: none;
+            }
+
+            .brand {
+                justify-content: center;
+                padding: 0;
+            }
+
+            .nav-item {
+                justify-content: center;
+            }
+
+            .sidebar-bottom {
+                display: none;
+            }
+
+            .main {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+                padding: 25px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .main {
+                padding: 20px 15px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                align-items: flex-start;
+            }
+
+            .profile {
+                display: none;
+            }
+
+            .task-form {
+                flex-direction: column;
+            }
+
+            .add-btn {
+                height: 44px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>Cloud Task Manager 🚀</h1>
+<div class="app">
 
-    <form method="POST">
-        <input
-            type="text"
-            name="task"
-            placeholder="Enter a task"
-            required
-        >
-        <button type="submit">Add Task</button>
-    </form>
+    <!-- SIDEBAR -->
 
-    <h2>My Tasks</h2>
+    <aside class="sidebar">
 
-    <ul>
-        {% for task in tasks %}
-            <li>
-                {{ task["task"] }}
-            </li>
-        {% endfor %}
-    </ul>
+        <div class="brand">
+            <div class="brand-icon">✓</div>
+
+            <div>
+                <div class="brand-name">Cloud Tasks</div>
+                <div class="brand-subtitle">Task Management</div>
+            </div>
+        </div>
+
+        <div class="nav-title">Workspace</div>
+
+        <div class="nav-item active">
+            <span class="nav-icon">▦</span>
+            <span>Dashboard</span>
+        </div>
+
+        <div class="nav-item">
+            <span class="nav-icon">✓</span>
+            <span>My Tasks</span>
+        </div>
+
+        <div class="nav-item">
+            <span class="nav-icon">◷</span>
+            <span>Activity</span>
+        </div>
+
+        <div class="nav-title" style="margin-top: 30px;">System</div>
+
+        <div class="nav-item">
+            <span class="nav-icon">⚙</span>
+            <span>Settings</span>
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <div class="cloud-status">
+
+                <div class="status-row">
+                    <span class="status-dot"></span>
+                    Application Online
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <div>
+                <div class="page-title">Dashboard</div>
+
+                <div class="page-description">
+                    Manage your tasks from one place.
+                </div>
+            </div>
+
+            <div class="profile">
+
+                <div class="avatar">MP</div>
+
+                <div>
+                    <div style="font-size: 13px; font-weight: 600;">
+                        Cloud User
+                    </div>
+
+                    <div style="font-size: 11px; color: #69758b;">
+                        Developer
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- STATISTICS -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    TOTAL TASKS
+                </div>
+
+                <div class="stat-number">
+                    {{ tasks|length }}
+                </div>
+
+                <div class="stat-description">
+                    Tasks in your workspace
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    STATUS
+                </div>
+
+                <div class="stat-number">
+                    Active
+                </div>
+
+                <div class="stat-description">
+                    Application is running
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    PLATFORM
+                </div>
+
+                <div class="stat-number">
+                    AWS
+                </div>
+
+                <div class="stat-description">
+                    Containerized deployment
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONTENT -->
+
+        <div class="content-grid">
+
+
+            <!-- TASK PANEL -->
+
+            <section class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="panel-title">
+                            Your Tasks
+                        </div>
+
+                        <div class="panel-subtitle">
+                            Create and manage your tasks
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ADD TASK -->
+
+                <form method="POST" class="task-form">
+
+                    <input
+                        type="text"
+                        name="task"
+                        class="task-input"
+                        placeholder="What needs to be done?"
+                        required
+                    >
+
+                    <button type="submit" class="add-btn">
+                        + Add Task
+                    </button>
+
+                </form>
+
+
+                <!-- TASK LIST -->
+
+                <div class="task-list">
+
+                    {% if tasks %}
+
+                        {% for task in tasks %}
+
+                        <div class="task">
+
+                            <div class="task-check"></div>
+
+                            <div class="task-content">
+
+                                <div class="task-name">
+                                    {{ task["task"] }}
+                                </div>
+
+                                <div class="task-id">
+                                    TASK-{{ "%03d" | format(task["id"]) }}
+                                </div>
+
+                            </div>
+
+                            <div class="badge">
+                                ACTIVE
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="empty">
+
+                            <div class="empty-icon">
+                                ✓
+                            </div>
+
+                            <div class="empty-title">
+                                No tasks yet
+                            </div>
+
+                            <div class="empty-text">
+                                Add your first task using the field above.
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </section>
+
+
+            <!-- PROJECT INFO -->
+
+            <section class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="panel-title">
+                            Project Overview
+                        </div>
+
+                        <div class="panel-subtitle">
+                            Deployment information
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        Application
+                    </div>
+
+                    <div class="info-value">
+                        Cloud Task Manager
+                    </div>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        Runtime
+                    </div>
+
+                    <div class="info-value">
+                        Docker + Flask
+                    </div>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        Deployment
+                    </div>
+
+                    <div class="info-value">
+                        Amazon ECS Fargate
+                    </div>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        CI/CD
+                    </div>
+
+                    <div class="info-value">
+                        GitHub Actions
+                    </div>
+
+                </div>
+
+
+                <div class="info-card">
+
+                    <div class="info-label">
+                        Technology Stack
+                    </div>
+
+                    <div class="tech-stack">
+
+                        <span class="tech">Python</span>
+                        <span class="tech">Flask</span>
+                        <span class="tech">Docker</span>
+                        <span class="tech">AWS ECR</span>
+                        <span class="tech">ECS</span>
+                        <span class="tech">Fargate</span>
+                        <span class="tech">GitHub Actions</span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
 
 </body>
 </html>
